@@ -18,6 +18,7 @@ export default class RosObjectProvider {
         await this.#loadTopics();
     }
 
+    // eslint-disable-next-line require-await
     async #fetchFromRos(url) {
         throw new Error(`Not implemented to work ${url}`);
     }
@@ -88,6 +89,7 @@ export default class RosObjectProvider {
         this.mctObjects[object.identifier.key] = object;
     }
 
+    // eslint-disable-next-line require-await
     async #addRosTopic(rosTopic, parent) {
         const id = 'TODO';
         const topicTitle = 'No Title';

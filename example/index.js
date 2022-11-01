@@ -1,5 +1,5 @@
 
-import installRisPlugin from '../src/plugin.js';
+import installRosPlugin from '../src/plugin.js';
 
 const config = {
     "rosBridgeEndpoint": "ws://localhost:8085/ros-proxy/"

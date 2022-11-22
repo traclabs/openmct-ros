@@ -6,40 +6,38 @@ export default class RosObjectProvider {
         this.url = url;
         this.namespace = NAMESPACE;
         this.rootObject = null;
-        this.mctObjects = {};
-        this.rosTopicsLoaded = false;
+        this.dictionary = {};
         this.fetchRosTopicsPromise = null;
 
         this.#initialize();
     }
 
-    async #initialize() {
+    #initialize() {
         this.rootObject = this.#createRootObject();
-        await this.#loadTopics();
     }
 
-    // eslint-disable-next-line require-await
-    async #fetchFromRos(url) {
-        throw new Error(`Not implemented to work ${url}`);
+    async #doSomeWebSocketStuff() {
+        console.debug(`👺 Should be Fetching ROS Topics from ${this.url}`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        return [];
     }
 
-    async #loadTopics() {
-        if ((!this.rosTopicsLoaded && !this.fetchRosTopicsPromise)) {
-
-            const rosBridgeUrl = this.url;
-            if (!this.fetchRosTopicsPromise) {
-                try {
-                    this.fetchRosTopicsPromise = this.#fetchFromRos(rosBridgeUrl);
-                    const topicsArray = await this.fetchRosTopicsPromise;
-                    topicsArray.forEach(rosTopic => {
-                        this.#addRosTopic(rosTopic, this.rootObject);
-                    }
-                    );
-                    this.fetchRunningProcfetchRosTopicsPromiseeduresPromise = null;
-                } catch (error) {
-                    console.error(`😱 Error loading ROS Topics - ${error.message}`, error);
-                }
+    async #fetchFromRos() {
+        try {
+            const topicsArray = await this.#doSomeWebSocketStuff();
+            topicsArray.forEach(rosTopic => {
+                this.#addRosTopic(rosTopic, this.rootObject);
             }
+            );
+        } catch (error) {
+            console.error(`😱 Error loading ROS Topics - ${error.message}`, error);
+        }
+    }
+
+    #loadRosDictionary() {
+        if (!this.fetchRosTopicsPromise) {
+            this.fetchRosTopicsPromise = this.#fetchFromRos();
         }
 
         return this.fetchRosTopicsPromise;
@@ -63,15 +61,10 @@ export default class RosObjectProvider {
 
     async get(identifier) {
         const { key } = identifier;
-        // If we've created the object already, add it
-        if (Object.hasOwn(this.mctObjects, key)) {
-            return this.mctObjects[key];
-        }
+        await this.#loadRosDictionary();
+        const object = this.dictionary[key];
 
-        // Otherwise, grab the from the list of ROS Topics
-        await this.#loadTopics();
-
-        return this.mctObjects[key];
+        return object;
     }
 
     supportsSearchType(type) {
@@ -86,7 +79,7 @@ export default class RosObjectProvider {
     }
 
     #addObject(object) {
-        this.mctObjects[object.identifier.key] = object;
+        this.dictionary[object.identifier.key] = object;
     }
 
     // eslint-disable-next-line require-await

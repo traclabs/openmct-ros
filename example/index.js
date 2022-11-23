@@ -2,7 +2,7 @@
 import installRosPlugin from '../src/plugin.js';
 
 const config = {
-    "rosBridgeEndpoint": "ws://localhost:8085/ros-proxy/"
+    "rosBridgeEndpoint": "ws://localhost:9000/ros-proxy/"
 };
 const openmct = window.openmct;
 

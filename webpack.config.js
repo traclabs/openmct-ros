@@ -45,10 +45,11 @@ const WEBPACK_CONFIG = {
             publicPath: '/node_modules/openmct/dist'
         }],
         proxy: {
-            "/ros-proxy/*": {
-                target: "ws://0.0.0.0:8085/",
+            "/rosbridge-proxy/*": {
+                target: "ws://192.168.56.3:9090/",
                 secure: false,
-                pathRewrite: {'^/ros-proxy/': ''}
+                ws: true,
+                pathRewrite: {'^/rosbridge-proxy/': ''}
             }
         }
     }

@@ -1,4 +1,5 @@
 import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from '../const';
+import ROSLIB from 'roslib';
 
 export default class RosObjectProvider {
     constructor(openmct, url) {
@@ -16,9 +17,43 @@ export default class RosObjectProvider {
         this.rootObject = this.#createRootObject();
     }
 
+    onRosError(error) {
+        console.error(`🚨 error with ros`, error);
+    }
+
+    onRosConnection() {
+        console.debug(`🍉 Connected to ROS`);
+    }
+
+    getRosTopics(ros) {
+        let topicsClient = new ROSLIB.Service({
+            ros,
+            name: '/rosapi/topics',
+            serviceType: 'rosapi/Topics'
+        });
+
+        const request = new ROSLIB.ServiceRequest();
+
+        return new Promise(resolve => {
+            topicsClient.callService(request, (result) => {
+                console.debug('🥕 Result for service call on ' + topicsClient.name + ': ', result);
+                resolve(result);
+            });
+        });
+    }
+
     async #doSomeWebSocketStuff() {
         console.debug(`👺 Should be Fetching ROS Topics from ${this.url}`);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        const ros = new ROSLIB.Ros();
+        ros.on('connection', this.onRosConnection);
+        ros.on('error', this.onRosError);
+        ros.connect('ws://192.168.56.3:9090');
+
+        const topics = await this.getRosTopics(ros);
+        topics.forEach(topic => {
+            this.#addRosTopic(topic, this.rootObject);
+        });
+
 
         return [];
     }

@@ -102,8 +102,7 @@ export default class RosObjectProvider {
         this.dictionary[object.identifier.key] = object;
     }
 
-    // eslint-disable-next-line require-await
-    async #addRosTopic(rosTopic, parent) {
+    #addRosTopic(rosTopic, parent) {
         const santizedName = rosTopic.replace(/\//g, '.').slice(1);
         const id = santizedName;
         const topicTitle = santizedName;

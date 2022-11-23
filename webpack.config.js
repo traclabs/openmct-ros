@@ -43,15 +43,7 @@ const WEBPACK_CONFIG = {
         }, {
             directory: path.join(__dirname, '/node_modules/openmct/dist'),
             publicPath: '/node_modules/openmct/dist'
-        }],
-        proxy: {
-            "/rosbridge-proxy/*": {
-                target: "ws://192.168.56.3:9090/",
-                secure: false,
-                ws: true,
-                pathRewrite: {'^/rosbridge-proxy/': ''}
-            }
-        }
+        }]
     }
 };
 

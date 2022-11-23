@@ -19,7 +19,7 @@ export default function installRosPlugin(configuration) {
 
         openmct.objects.addProvider(NAMESPACE, objectProvider);
 
-        openmct.types.addType(OBJECT_TYPES.PROCEDURE_TYPE, {
+        openmct.types.addType(OBJECT_TYPES.ROS_TOPIC_TYPE, {
             name: 'Ros Topic',
             description: 'A Ros Topic',
             cssClass: 'icon-dictionary'

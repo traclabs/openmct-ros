@@ -47,13 +47,12 @@ export default class RosObjectProvider {
         const ros = new ROSLIB.Ros();
         ros.on('connection', this.onRosConnection);
         ros.on('error', this.onRosError);
-        ros.connect('ws://192.168.56.3:9090');
+        ros.connect(this.url);
 
-        const topics = await this.getRosTopics(ros);
+        const {topics} = await this.getRosTopics(ros);
         topics.forEach(topic => {
             this.#addRosTopic(topic, this.rootObject);
         });
-
 
         return [];
     }
@@ -119,8 +118,9 @@ export default class RosObjectProvider {
 
     // eslint-disable-next-line require-await
     async #addRosTopic(rosTopic, parent) {
-        const id = 'TODO';
-        const topicTitle = 'No Title';
+        const santizedName = rosTopic.replace(/\//g, '.').slice(1);
+        const id = santizedName;
+        const topicTitle = santizedName;
 
         const location = this.openmct.objects.makeKeyString({
             key: parent.identifier.key,

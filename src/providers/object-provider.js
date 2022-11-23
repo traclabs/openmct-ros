@@ -42,7 +42,7 @@ export default class RosObjectProvider {
         });
     }
 
-    async #doSomeWebSocketStuff() {
+    async #fetchFromRos() {
         console.debug(`👺 Should be Fetching ROS Topics from ${this.url}`);
         const ros = new ROSLIB.Ros();
         ros.on('connection', this.onRosConnection);
@@ -53,20 +53,6 @@ export default class RosObjectProvider {
         topics.forEach(topic => {
             this.#addRosTopic(topic, this.rootObject);
         });
-
-        return [];
-    }
-
-    async #fetchFromRos() {
-        try {
-            const topicsArray = await this.#doSomeWebSocketStuff();
-            topicsArray.forEach(rosTopic => {
-                this.#addRosTopic(rosTopic, this.rootObject);
-            }
-            );
-        } catch (error) {
-            console.error(`😱 Error loading ROS Topics - ${error.message}`, error);
-        }
     }
 
     #loadRosDictionary() {

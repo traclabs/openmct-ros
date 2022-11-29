@@ -2,9 +2,9 @@ import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from '../const';
 import ROSLIB from 'roslib';
 
 export default class RosObjectProvider {
-    constructor(openmct, url) {
+    constructor(openmct, rosConnection) {
         this.openmct = openmct;
-        this.url = url;
+        this.rosConnection = rosConnection;
         this.namespace = NAMESPACE;
         this.rootObject = null;
         this.dictionary = {};
@@ -15,14 +15,6 @@ export default class RosObjectProvider {
 
     #initialize() {
         this.rootObject = this.#createRootObject();
-    }
-
-    onRosError(error) {
-        console.error(`🚨 error with ros`, error);
-    }
-
-    onRosConnection() {
-        console.debug(`🍉 Connected to ROS`);
     }
 
     getRosTopics(ros) {
@@ -43,12 +35,7 @@ export default class RosObjectProvider {
     }
 
     async #fetchFromRos() {
-        console.debug(`👺 Should be Fetching ROS Topics from ${this.url}`);
-        const ros = new ROSLIB.Ros();
-        ros.on('connection', this.onRosConnection);
-        ros.on('error', this.onRosError);
-        ros.connect(this.url);
-
+        const ros = await this.rosConnection.getConnection();
         const {topics} = await this.getRosTopics(ros);
         topics.forEach(topic => {
             this.#addRosTopic(topic, this.rootObject);

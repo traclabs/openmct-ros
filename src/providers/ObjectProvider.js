@@ -1,5 +1,6 @@
 import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from '../const';
 
+// eslint-disable-next-line no-unused-vars
 const formatConversionMap = {
     "uint64": "int",
     "int64": "int",
@@ -48,6 +49,7 @@ export default class RosObjectProvider {
     async #fetchFromRos() {
         const ros = await this.rosConnection.getConnection();
         const {topics, types} = await this.getRosTopics(ros);
+        // eslint-disable-next-line require-await
         await Promise.all(topics.map(async (topic, index) => {
             console.debug('🥕 Attempting to add topic', topic);
             const messageType = types[index];

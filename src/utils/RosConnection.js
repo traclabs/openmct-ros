@@ -25,7 +25,7 @@ export default class RosConnection {
                 resolve(ros);
             });
             ros.on('error', (error) => {
-                console.error(`🚨 Error connecting to ROS 🚨`, error);
+                console.error(`🚨 Error connecting to ROS. Ensure rosbridge_server is running on ${this.url} 🚨`, error);
                 reject(error);
             });
         });

@@ -1,5 +1,22 @@
 import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from '../const';
-import ROSLIB from 'roslib';
+
+const formatConversionMap = {
+    "uint64": "int",
+    "int64": "int",
+    "uint32": "int",
+    "int32": "int",
+    "uint16": "int",
+    "int16": "int",
+    "uint8": "int",
+    "int8": "int",
+
+    "float32": "float",
+    "float64": "float",
+
+    "byte": "byte",
+    "string": "string",
+    "bool": "bool"
+};
 
 export default class RosObjectProvider {
     constructor(openmct, rosConnection) {
@@ -18,27 +35,50 @@ export default class RosObjectProvider {
     }
 
     getRosTopics(ros) {
-        let topicsClient = new ROSLIB.Service({
-            ros,
-            name: '/rosapi/topics',
-            serviceType: 'rosapi/Topics'
-        });
-
-        const request = new ROSLIB.ServiceRequest();
-
-        return new Promise(resolve => {
-            topicsClient.callService(request, (result) => {
-                console.debug('🥕 Result for service call on ' + topicsClient.name + ': ', result);
+        return new Promise((resolve, reject) => {
+            ros.getTopics((result) => {
+                console.debug('🥕 Result for topics', result);
                 resolve(result);
+            }, (error) => {
+                reject(error);
             });
         });
     }
 
     async #fetchFromRos() {
         const ros = await this.rosConnection.getConnection();
-        const {topics} = await this.getRosTopics(ros);
-        topics.forEach(topic => {
-            this.#addRosTopic(topic, this.rootObject);
+        const {topics, types} = await this.getRosTopics(ros);
+        await Promise.all(topics.map(async (topic, index) => {
+            console.debug('🥕 Attempting to add topic', topic);
+            const messageType = types[index];
+            const messageDetails = {};
+            // FIXME: this is currently broken due to a bug in rosapi
+            // const messageDetails = await this.#getMessageDetails(ros, messageType);
+            console.debug('🥕 Fetched details for topic', topic);
+            this.#addRosTopic({
+                topic,
+                messageType,
+                messageDetails,
+                parent: this.rootObject
+            });
+            console.debug('🥕 Added topic', topic);
+        }
+        ));
+        console.debug('🥕 Dictionary loaded', this.dictionary);
+    }
+
+    #getMessageDetails(ros, messageType) {
+        return new Promise ((resolve, reject) => {
+            console.debug('🥕 Asking for details for', messageType);
+            ros.getMessageDetails(messageType, (details) => {
+                console.debug('🥕 Received details for', messageType);
+                const decodeMessageDetails = ros.decodeTypeDefs(details);
+                console.debug('🥕 Decoded message for', messageType);
+                resolve(decodeMessageDetails);
+            }, (error) => {
+                console.error('🥕 Error fetching message details', error);
+                reject(error);
+            });
         });
     }
 
@@ -89,8 +129,8 @@ export default class RosObjectProvider {
         this.dictionary[object.identifier.key] = object;
     }
 
-    #addRosTopic(rosTopic, parent) {
-        const santizedName = rosTopic.replace(/\//g, '.').slice(1);
+    #addRosTopic({topic, messageType, messageDetails, parent}) {
+        const santizedName = topic.replace(/\//g, '.').slice(1);
         const id = santizedName;
         const topicTitle = santizedName;
 

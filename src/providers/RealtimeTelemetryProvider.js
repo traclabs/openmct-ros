@@ -6,7 +6,6 @@ export default class RealtimeTelemetryProvider {
         this.openmct = openmct;
         this.rosConnection = rosConnection;
         this.subscriptionsById = {};
-        console.debug('🦃 RealtimeTelemetryProvider instantiated');
     }
     async #buildSubscription(domainObject, callback) {
         const id = domainObject.identifier.key;

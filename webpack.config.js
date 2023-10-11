@@ -37,7 +37,7 @@ const WEBPACK_CONFIG = {
     devtool: devMode ? 'eval-source-map' : 'source-map',
     devServer: {
         compress: true,
-        port: 9000,
+        port: 9090,
         static: [{
             directory: path.join(__dirname, 'example')
         }, {

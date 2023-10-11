@@ -12,7 +12,7 @@ npm run build:example
 npm start
 ```
 
-This should build the example and run the Open MCT development server. After the server has started, launch a web browser pointing to http://localhost:9000/ 
+This should build the example and run the Open MCT development server. After the server has started, launch a web browser pointing to http://localhost:9090/ 
 This will start the Open MCT web application connected to a running `rosbridge_server` on `ws://rosmachine:9090`.
 Note you can change the hostname/IP of the `rosbridge_server` in `example/index.js`.
 
@@ -39,4 +39,4 @@ ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```bash
 ros2 run turtlesim turtlesim_node
 ```
-2. Refresh your browser pointing to http://localhost:9000/ - it should automatically connect and display a list of ROS topics.
+2. Refresh your browser pointing to http://localhost:9090/ - it should automatically connect and display a list of ROS topics.

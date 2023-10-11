@@ -9,9 +9,21 @@ export default function installRosPlugin(configuration) {
         openmct.install(openmct.plugins.ISOTimeFormat());
 
         openmct.types.addType(OBJECT_TYPES.ROS_TOPIC_TYPE, {
-            name: 'Ros Topic',
-            description: 'A Ros Topic',
+            name: 'ROS Topic',
+            description: 'A ROS Topic',
             cssClass: 'icon-dictionary'
+        });
+
+        openmct.types.addType(OBJECT_TYPES.ROS_AGGREGATE_MESSAGE, {
+            name: 'ROS Aggregate Message',
+            description: 'A ROS Aggregate Message',
+            cssClass: 'icon-telemetry-aggregate'
+        });
+
+        openmct.types.addType(OBJECT_TYPES.ROS_LEAF_MESSAGE, {
+            name: 'ROS Leaf Message',
+            description: 'A ROS Leaf Message',
+            cssClass: 'icon-telemetry'
         });
 
         const rosConnection = new RosConnection(configuration.rosBridgeEndpoint);

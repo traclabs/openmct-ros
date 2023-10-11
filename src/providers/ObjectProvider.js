@@ -13,6 +13,7 @@ const formatConversionMap = {
 
     "float32": "float",
     "float64": "float",
+    "float": "float",
 
     "byte": "byte",
     "string": "string",
@@ -55,14 +56,15 @@ export default class RosObjectProvider {
         await Promise.all(topics.map(async (topic, index) => {
             console.debug('🥕 Attempting to add topic', topic);
             const messageType = types[index];
-            // FIXME: this is currently broken due to a bug in rosapi
-            // const messageDetails = await this.#getMessageDetails(ros, messageType);
-            const messageDetails = {};
+            const messageDetails = await this.#getMessageDetails(ros, messageType);
+            const name = topic.replace(/\//g, '.').slice(1);
             console.debug('🥕 Fetched details for topic', topic);
-            this.#addRosTopic({
-                topic,
-                messageType,
+            this.#addRosTelemetry({
+                name,
+                type: OBJECT_TYPES.ROS_TOPIC_TYPE,
                 messageDetails,
+                rosType: messageType,
+                rosTopic: name,
                 parent: this.rootObject
             });
             console.debug('🥕 Added topic', topic);
@@ -77,7 +79,7 @@ export default class RosObjectProvider {
             ros.getMessageDetails(messageType, (details) => {
                 console.debug('🥕 Received details for', messageType);
                 const decodeMessageDetails = ros.decodeTypeDefs(details);
-                console.debug('🥕 Decoded message for', messageType);
+                console.debug('🥕 Decoded message for', decodeMessageDetails);
                 resolve(decodeMessageDetails);
             }, (error) => {
                 console.error('🥕 Error fetching message details', error);
@@ -133,22 +135,41 @@ export default class RosObjectProvider {
         this.dictionary[object.identifier.key] = object;
     }
 
-    #addRosTopic({topic, messageType, messageDetails, parent}) {
-        const santizedName = topic.replace(/\//g, '.').slice(1);
-        const id = santizedName;
-        const topicTitle = santizedName;
+    #isAggregateMessage(type) {
+        return type === OBJECT_TYPES.ROS_AGGREGATE_MESSAGE || type === OBJECT_TYPES.ROS_TOPIC_TYPE;
+    }
 
+    #addRosTelemetry({name, type, rosType, rosTopic, messageDetails, parent}) {
         const location = this.openmct.objects.makeKeyString({
             key: parent.identifier.key,
             namespace: parent.identifier.namespace
         });
-        const obj = {
+        const subMessageKeys = typeof messageDetails === 'object' ? Object.keys(messageDetails) : [];
+
+        let determinedType = type;
+        // if type is null, determine if we're a lead or aggregate message
+        if (!determinedType) {
+            if (subMessageKeys.length > 0) {
+                determinedType = OBJECT_TYPES.ROS_AGGREGATE_MESSAGE;
+            } else {
+                determinedType = OBJECT_TYPES.ROS_LEAF_MESSAGE;
+            }
+        }
+
+        let determinedName = name;
+        if (determinedType !== OBJECT_TYPES.ROS_TOPIC_TYPE) {
+            determinedName = `${parent.identifier.key}.${name}`;
+        }
+
+        const newMctObject = {
             identifier: {
-                key: id,
+                key: determinedName,
                 namespace: this.namespace
             },
-            type: OBJECT_TYPES.ROS_TOPIC_TYPE,
-            name: topicTitle,
+            type: determinedType,
+            name: determinedName,
+            rosType,
+            rosTopic,
             location: location,
             configuration: {},
             telemetry: {
@@ -164,8 +185,55 @@ export default class RosObjectProvider {
             }
         };
 
-        this.#addObject(obj);
+        if (this.#isAggregateMessage(determinedType)) {
+            subMessageKeys.forEach((subMessageKey) => {
+                const subMessageDetail = messageDetails[subMessageKey];
+                const format = formatConversionMap[subMessageDetail];
+                if (format) {
+                    const telemetryValue = {
+                        key: `${determinedName}.${subMessageKey}`,
+                        source: subMessageKey,
+                        name: subMessageKey,
+                        format,
+                        rosType: subMessageDetail,
+                        hints: {
+                            domain: 1
+                        }
+                    };
+                    newMctObject.telemetry.values.push(telemetryValue);
+                }
 
-        parent.composition.push(obj.identifier);
+                this.#addRosTelemetry({
+                    name: subMessageKey,
+                    messageDetails: subMessageDetail,
+                    rosType,
+                    rosTopic,
+                    parent: newMctObject
+                });
+            });
+        } else {
+            // leaf node
+            const format = formatConversionMap[messageDetails];
+            if (format) {
+                const telemetryValue = {
+                    key: 'value',
+                    name: 'Value',
+                    format,
+                    rosType: messageDetails,
+                    hints: {
+                        range: 1
+                    }
+                };
+                newMctObject.telemetry.values.push(telemetryValue);
+            }
+        }
+
+        this.#addObject(newMctObject);
+
+        if (!parent.composition) {
+            parent.composition = [];
+        }
+
+        parent.composition.push(newMctObject.identifier);
     }
 }

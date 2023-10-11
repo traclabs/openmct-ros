@@ -9,7 +9,7 @@
     "lint": "eslint src example",
     "lint:fix": "eslint src example --fix",
     "build:dist": "NODE_ENV=production webpack",
-    "build:example": "npm install openmct@unstable --no-save",
+    "build:example": "npm install nasa/openmct#master --no-save",
     "start": "NODE_ENV=dev webpack-dev-server",
     "prepare": "npm run build:dist"
   },
@@ -20,7 +20,7 @@
   "author": "TRACLabs Inc.",
   "license": "closed",
   "engines": {
-    "node": ">=14.19.1 <18.0.0"
+    "node": ">=14.19.1 <18.99.0"
   },
   "peerDependencies": {
     "openmct": "^2.0.5"

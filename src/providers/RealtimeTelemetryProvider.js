@@ -7,6 +7,15 @@ export default class RealtimeTelemetryProvider {
         this.rosConnection = rosConnection;
         this.subscriptionsById = {};
     }
+    async requestLatest(domainObject) {
+        console.debug(`📡 Requesting latest for ${domainObject.identifier.key}`);
+
+        return {
+            id: domainObject.identifier,
+            timestamp: Date.now(),
+            value: 2
+        };
+    }
     async #buildSubscription(domainObject, callback) {
         const id = domainObject.identifier.key;
         const rosTopicName = id.replace(/\./g, '/');
@@ -32,8 +41,10 @@ export default class RealtimeTelemetryProvider {
         this.#buildSubscription(domainObject, callback).then(subscriptionDetails => {
             subscriptionDetails.topic.subscribe(callback);
             this.subscriptionsById[subscriptionDetails.id] = subscriptionDetails;
-
-            return subscriptionDetails.topic.unsubscribe;
         });
+
+        return () => {
+            console.debug(`☎️ Should be unsubscribing here`);
+        };
     }
 }

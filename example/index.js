@@ -2,7 +2,7 @@
 import installRosPlugin from '../src/plugin.js';
 
 const config = {
-    "rosBridgeEndpoint": "ws://192.168.56.3:9090"
+    "rosBridgeEndpoint": "ws://rosmachine:9090"
 };
 const openmct = window.openmct;
 

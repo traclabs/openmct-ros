@@ -35,15 +35,17 @@ export default class RosObjectProvider {
         this.rootObject = this.#createRootObject();
     }
 
-    getRosTopics(ros) {
-        return new Promise((resolve, reject) => {
-            ros.getTopics((result) => {
-                console.debug('🥕 Result for topics', result);
-                resolve(result);
+    async getRosTopics(ros) {
+        const result = await new Promise((resolve, reject) => {
+            ros.getTopics((topics) => {
+                console.debug('🥕 Result for topics', topics);
+                resolve(topics);
             }, (error) => {
                 reject(error);
             });
         });
+
+        return result;
     }
 
     async #fetchFromRos() {
@@ -53,9 +55,8 @@ export default class RosObjectProvider {
         await Promise.all(topics.map(async (topic, index) => {
             console.debug('🥕 Attempting to add topic', topic);
             const messageType = types[index];
-            const messageDetails = {};
             // FIXME: this is currently broken due to a bug in rosapi
-            // const messageDetails = await this.#getMessageDetails(ros, messageType);
+            const messageDetails = await this.#getMessageDetails(ros, messageType);
             console.debug('🥕 Fetched details for topic', topic);
             this.#addRosTopic({
                 topic,

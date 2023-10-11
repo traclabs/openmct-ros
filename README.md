@@ -1,19 +1,9 @@
 # ROS Plugin for Open MCT
 This project provides a plugin for connecting Open MCT to ROS.
 
-## Running the example
+# Installation
 
-An example is provided in this repository that can be configured to run against any ROS installation.
-
-### Prerequisites
-* [A git client](https://git-scm.com/)
-* [NodeJS](https://nodejs.org/)
-
-### Compatibility
-* Supported NodeJS available in our package.json's `engine` key.
-* Minimum Supported Open MCT version in our package.json's `peerDependencies` key.
-
-### Installation
+## Building the client
 ```
 git clone git@bitbucket.org:traclabs/openmct-ros.git
 cd openmct-ros
@@ -22,35 +12,20 @@ npm run build:example
 npm start
 ```
 
-This should build the example, and launch a web browser with Open MCT connected to a locally running ROS Server.
+This should build the example, and launch a web browser pointing to http://localhost:9000/ with Open MCT connected to a running `rosbridge_server` on `ws://rosmachine:9090`.
+Note you can change the hostname/IP of the `rosbridge_server` in `example/index.js`.
 
-## Using the Open MCT-ROS plugin in your own project
+## Running an example ROS with `rosbridge_server`
+To run `rosbridge_server`:
 
-When building an application with Open MCT, we strongly advise building with Open MCT as a dependency, rather than 
-building your project from the Open MCT source. Please refer to 
-[our guidance on this](https://github.com/nasa/openmct/blob/master/API.md#starting-an-open-mct-application).
-
-### Installing the plugin
-
-The Open MCT - ROS adapter can be included as an ES6 module using an import statement. If you are using Webpack it 
-can be imported using only the package name, otherwise the full path to the dependency should be used.
-
-eg.
-
-#### Using Webpack
+1. First install [ROS2 Humble Hawksbill](https://docs.ros.org/en/foxy/Releases/Release-Humble-Hawksbill.html) on an Ubuntu machine. This repository will eventually provide a Docker file to do this, but right you'll need a VM.
+1. Then launch an example ROS node, like `turtlesim` like so:
+```bash
+ros2 run turtlesim turtlesim_node
 ```
-import installRosPlugin from 'openmct-ros';
+1. Then launch `rosbridge_server` like so:
+```bash
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```
 
-#### Using native ES6 imports:
-```
-import installRosPlugin from 'node_modules/openmct-ros/dist/openmct-ros.js'
-```
-
-The plugin can then be installed and configured like so:
-```
-openmct.install(installRosPlugin({
-    "rosBridgeEndpoint": "ws://localhost:8085/",
-}));
-```
-
+After launching `rosbridge_server`, refreshing the web browser should automatically connect and display a list of ROS topics.

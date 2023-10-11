@@ -56,7 +56,8 @@ export default class RosObjectProvider {
             console.debug('🥕 Attempting to add topic', topic);
             const messageType = types[index];
             // FIXME: this is currently broken due to a bug in rosapi
-            const messageDetails = await this.#getMessageDetails(ros, messageType);
+            // const messageDetails = await this.#getMessageDetails(ros, messageType);
+            const messageDetails = {};
             console.debug('🥕 Fetched details for topic', topic);
             this.#addRosTopic({
                 topic,

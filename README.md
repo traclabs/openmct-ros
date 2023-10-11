@@ -12,20 +12,31 @@ npm run build:example
 npm start
 ```
 
-This should build the example, and launch a web browser pointing to http://localhost:9000/ with Open MCT connected to a running `rosbridge_server` on `ws://rosmachine:9090`.
+This should build the example and run the Open MCT development server. After the server has started, launch a web browser pointing to http://localhost:9000/ 
+This will start the Open MCT web application connected to a running `rosbridge_server` on `ws://rosmachine:9090`.
 Note you can change the hostname/IP of the `rosbridge_server` in `example/index.js`.
 
-## Running an example ROS with `rosbridge_server`
-To run `rosbridge_server`:
-
+## Using the "fixed" `rosbridge_server`
 1. First install [ROS2 Humble Hawksbill](https://docs.ros.org/en/foxy/Releases/Release-Humble-Hawksbill.html) on an Ubuntu machine. This repository will eventually provide a Docker file to do this, but right you'll need a VM.
-1. Then launch an example ROS node, like `turtlesim` like so:
 ```bash
-ros2 run turtlesim turtlesim_node
+mkdir -p ~/ros2_ws/src
+cd ros2_ws
+rosdep install -i --from-path src --rosdistro humble -y
+colcon build --symlink-install
 ```
-1. Then launch `rosbridge_server` like so:
+2. Then open a new terminal:
 ```bash
+# load humble install
+source /opt/ros/humble/setup.bash
+# load our overlay
+cd ros2_ws/
+source install/local_setup.bash
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```
 
-After launching `rosbridge_server`, refreshing the web browser should automatically connect and display a list of ROS topics.
+## Running turtlesim
+1. Launch good ol' `turtlesim` like so:
+```bash
+ros2 run turtlesim turtlesim_node
+```
+2. Refresh your browser pointing to http://localhost:9000/ - it should automatically connect and display a list of ROS topics.

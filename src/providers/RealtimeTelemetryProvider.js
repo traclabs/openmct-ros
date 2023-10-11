@@ -1,5 +1,6 @@
 import { OBJECT_TYPES } from '../const';
 import ROSLIB from 'roslib';
+import { LRUCache } from 'lru-cache';
 
 export default class RealtimeTelemetryProvider {
     constructor(openmct, rosConnection) {
@@ -8,19 +9,40 @@ export default class RealtimeTelemetryProvider {
         this.subscriptionsById = {};
     }
     // eslint-disable-next-line require-await
-    async request(domainObject) {
-        console.debug(`📡 Requesting latest for ${domainObject.identifier.key}`);
+    async request(domainObject, options) {
+        const startTelemetry = options.start;
+        const endTelemetry = options.end;
         const subscriberID = domainObject.identifier.key;
-        const latestValue = this.subscriptionsById[subscriberID]?.latestValue;
-        const datum = {
-            id: domainObject.identifier,
-            timestamp: Date.now(),
-            value: latestValue
-        };
+        const cache = this.subscriptionsById[subscriberID]?.cache;
+        // from the cache, extract all the values that are within the requested range
+        let dataToBeReturned = [];
+        const cacheIterator = cache ? cache.values() : null;
 
-        return datum;
+        if (cacheIterator) {
+            let next = cacheIterator.next();
+            while (!next.done) {
+                if ((next.value) && (next.value.timestamp >= startTelemetry && next.value.timestamp <= endTelemetry)) {
+                    const datum = {
+                        id: domainObject.identifier,
+                        value: next.value.value,
+                        timestamp: next.value.timestamp
+                    };
+                    dataToBeReturned.push(datum);
+                }
+
+                next = cacheIterator.next();
+            }
+        }
+
+        console.debug(`📡 Found data of size ${dataToBeReturned.length} `);
+
+        return dataToBeReturned;
     }
     async #buildSubscription(domainObject, callback) {
+        if (this.subscriptionsById[domainObject.identifier.key]) {
+            return this.subscriptionsById[domainObject.identifier.key];
+        }
+
         console.debug(`📡 Building subscription for ${domainObject.identifier.key}`);
         const id = domainObject.identifier.key;
         const rosTopicName = domainObject.rosTopic.replace(/\./g, '/');
@@ -36,7 +58,7 @@ export default class RealtimeTelemetryProvider {
             id,
             topicName: rosTopicName,
             callback,
-            latestValue: null
+            cache: new LRUCache({max: 100000})
         };
     }
 
@@ -59,21 +81,22 @@ export default class RealtimeTelemetryProvider {
                 const lastKey = splitId[splitId.length - 1];
                 const lastKeyWithoutUnderscore = lastKey.replace('_', '');
                 const value = data[lastKeyWithoutUnderscore];
+                const timestamp = Date.now();
                 const datum = {
                     id: domainObject.identifier,
-                    timestamp: Date.now(),
+                    timestamp,
                     value
                 };
-                subscriptionDetails.latestValue = value;
+                subscriptionDetails.cache.set(timestamp, datum);
                 callback(datum);
             });
             this.subscriptionsById[subscriberID] = subscriptionDetails;
         });
 
         return () => {
-            console.debug(`📡 Unnsubscribing to ${subscriberID}`);
-            this.subscriptionsById[subscriberID].topic.unsubscribe();
-            delete this.subscriptionsById[subscriberID];
+            // right now, we'll just accumulate data
+            // this.subscriptionsById[subscriberID].topic.unsubscribe();
+            // delete this.subscriptionsById[subscriberID];
         };
     }
 }

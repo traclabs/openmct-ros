@@ -4,6 +4,9 @@ This project provides a plugin for connecting Open MCT to ROS.
 # Installation
 
 ## Building the client
+Get the latest [Node 18](https://nodejs.org/en/download)
+
+Then run:
 ```
 git clone git@bitbucket.org:traclabs/openmct-ros.git
 cd openmct-ros

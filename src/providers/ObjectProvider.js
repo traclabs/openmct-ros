@@ -77,7 +77,7 @@ export default class RosObjectProvider {
         return new Promise ((resolve, reject) => {
             console.debug('🥕 Asking for details for', messageType);
             ros.getMessageDetails(messageType, (details) => {
-                console.debug('🥕 Received details for', messageType);
+                console.debug(`🥕 Received details for ${messageType}`, details);
                 const decodeMessageDetails = ros.decodeTypeDefs(details);
                 console.debug('🥕 Decoded message for', decodeMessageDetails);
                 resolve(decodeMessageDetails);

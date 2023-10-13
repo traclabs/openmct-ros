@@ -4,6 +4,4 @@ export const OBJECT_TYPES = {
     ROS_LEAF_MESSAGE: 'ros.leaf.message'
 };
 
-export const NAMESPACE = 'ros';
-
 export const ROOT_KEY = 'rosRoot';

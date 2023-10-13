@@ -2,7 +2,11 @@
 import installRosPlugin from '../src/plugin.js';
 
 const config = {
-    "rosBridgeEndpoint": "ws://rosmachine:9090"
+    "rosBridgeEndpoint": "ws://rosmachine:9090",
+    "unsubscribeFromTopicsOnStop": false,
+    "telemetryDataToKeepPerTopic": 10000,
+    "flattenArraysToSize": 10,
+    "namespace": "ros"
 };
 const openmct = window.openmct;
 

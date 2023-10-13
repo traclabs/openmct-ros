@@ -3,10 +3,12 @@ import ROSLIB from 'roslib';
 import { LRUCache } from 'lru-cache';
 
 export default class RealtimeTelemetryProvider {
-    constructor(openmct, rosConnection) {
+    constructor(openmct, rosConnection, unsubscribeFromTopicsOnStop, telemetryDataToKeepPerTopic) {
         this.openmct = openmct;
         this.rosConnection = rosConnection;
         this.subscriptionsById = {};
+        this.telemetryDataToKeepPerTopic = telemetryDataToKeepPerTopic;
+        this.unsubscribeFromTopicsOnStop = unsubscribeFromTopicsOnStop;
     }
     // eslint-disable-next-line require-await
     async request(domainObject, options) {
@@ -58,7 +60,7 @@ export default class RealtimeTelemetryProvider {
             id,
             topicName: rosTopicName,
             callback,
-            cache: new LRUCache({max: 100000})
+            cache: new LRUCache({max: this.telemetryDataToKeepPerTopic})
         };
     }
 
@@ -105,9 +107,11 @@ export default class RealtimeTelemetryProvider {
         });
 
         return () => {
-            // right now, we'll just accumulate data
-            // this.subscriptionsById[subscriberID].topic.unsubscribe();
-            // delete this.subscriptionsById[subscriberID];
+            if (this.unsubscribeFromTopicsOnStop) {
+                console.debug(`📡 Unsubscribing from ${subscriberID}`);
+                this.subscriptionsById[subscriberID].topic.unsubscribe();
+                delete this.subscriptionsById[subscriberID];
+            }
         };
     }
 }

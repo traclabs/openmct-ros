@@ -1,4 +1,4 @@
-import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from '../const';
+import { OBJECT_TYPES, ROOT_KEY } from '../const';
 
 // eslint-disable-next-line no-unused-vars
 const formatConversionMap = {
@@ -22,13 +22,14 @@ const formatConversionMap = {
 };
 
 export default class RosObjectProvider {
-    constructor(openmct, rosConnection) {
+    constructor(openmct, rosConnection, namespace, flattenArraysToSize) {
         this.openmct = openmct;
         this.rosConnection = rosConnection;
-        this.namespace = NAMESPACE;
+        this.namespace = namespace;
         this.rootObject = null;
         this.dictionary = {};
         this.fetchRosTopicsPromise = null;
+        this.flattenArraysToSize = flattenArraysToSize;
 
         this.#initialize();
     }
@@ -59,7 +60,7 @@ export default class RosObjectProvider {
             const messageType = types[index];
             const messageDetails = await this.#getMessageDetails(ros, messageType);
             const name = topic.replace(/\//g, '.').slice(1);
-            console.debug('🥕 Fetched details for topic', topic);
+            console.debug(`🥕 Fetched details for topic ${topic}`, messageDetails);
             this.#addRosTelemetry({
                 name,
                 type: OBJECT_TYPES.ROS_TOPIC_TYPE,
@@ -145,7 +146,6 @@ export default class RosObjectProvider {
             key: parent.identifier.key,
             namespace: parent.identifier.namespace
         });
-        console.debug(`Creating telemetry for ${name} with type ${type} and rosType ${rosType} and rosTopic ${rosTopic}`, messageDetails);
         const subMessageKeys = typeof messageDetails === 'object' ? Object.keys(messageDetails) : [];
 
         let determinedType = type;
@@ -157,6 +157,8 @@ export default class RosObjectProvider {
                 determinedType = OBJECT_TYPES.ROS_LEAF_MESSAGE;
             }
         }
+
+        console.debug(`Creating telemetry for ${name} with type ${determinedType} and rosType ${rosType} and rosTopic ${rosTopic}`, messageDetails);
 
         let determinedName = name;
         if (determinedType !== OBJECT_TYPES.ROS_TOPIC_TYPE) {
@@ -189,7 +191,12 @@ export default class RosObjectProvider {
 
         if (this.#isAggregateMessage(determinedType)) {
             subMessageKeys.forEach((subMessageKey) => {
-                const subMessageDetail = messageDetails[subMessageKey];
+                let subMessageDetail = messageDetails[subMessageKey];
+                if (Array.isArray(subMessageDetail)) {
+                    // replace subMessageDetail with X elements equal to this.flattenArraysToSize
+                    subMessageDetail = new Array(this.flattenArraysToSize).fill(subMessageDetail[0]);
+                }
+
                 const format = formatConversionMap[subMessageDetail];
                 if (format) {
                     const telemetryValue = {

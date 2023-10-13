@@ -1,7 +1,7 @@
 import RosConnection from './utils/RosConnection.js';
 import RosObjectProvider from './providers/ObjectProvider.js';
 import RealtimeTelemetryProvider from './providers/RealtimeTelemetryProvider.js';
-import { OBJECT_TYPES, NAMESPACE, ROOT_KEY } from './const';
+import { OBJECT_TYPES, ROOT_KEY } from './const';
 
 export default function installRosPlugin(configuration) {
     return function install(openmct) {
@@ -30,19 +30,23 @@ export default function installRosPlugin(configuration) {
 
         const objectProvider = new RosObjectProvider(
             openmct,
-            rosConnection
+            rosConnection,
+            configuration.namespace,
+            configuration.flattenArraysToSize
         );
 
         openmct.objects.addRoot({
-            namespace: NAMESPACE,
+            namespace: configuration.namespace,
             key: ROOT_KEY
         });
 
-        openmct.objects.addProvider(NAMESPACE, objectProvider);
+        openmct.objects.addProvider(configuration.namespace, objectProvider);
 
         const realTimeTelemetryProvider = new RealtimeTelemetryProvider(
             openmct,
-            rosConnection
+            rosConnection,
+            configuration.unsubscribeFromTopicsOnStop,
+            configuration.telemetryDataToKeepPerTopic
         );
 
         openmct.telemetry.addProvider(realTimeTelemetryProvider);

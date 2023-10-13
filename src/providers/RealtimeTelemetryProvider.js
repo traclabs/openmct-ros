@@ -87,20 +87,23 @@ export default class RealtimeTelemetryProvider {
                 let value = data;
                 splitId.forEach(key => {
                     key = key.replace('_', '');
-                    if (value && value[key] !== undefined) {
+                    if (Array.isArray(value) && key >= value.length) {
+                        value = undefined;
+                    } else if (value && value[key] !== undefined) {
                         value = value[key];
                     }
                 });
 
-                const timestamp = Date.now();
-                const datum = {
-                    id: domainObject.identifier,
-                    timestamp,
-                    value
-                };
-
-                subscriptionDetails.cache.set(timestamp, datum);
-                callback(datum);
+                if (value !== undefined && (typeof value !== 'object')) {
+                    const timestamp = Date.now();
+                    const datum = {
+                        id: domainObject.identifier,
+                        timestamp,
+                        value: value.toString()
+                    };
+                    subscriptionDetails.cache.set(timestamp, datum);
+                    callback(datum);
+                }
             });
 
             this.subscriptionsById[subscriberID] = subscriptionDetails;

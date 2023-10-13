@@ -14,6 +14,7 @@ const formatConversionMap = {
     "float32": "float",
     "float64": "float",
     "float": "float",
+    "double": "float",
 
     "byte": "byte",
     "string": "string",
@@ -144,6 +145,7 @@ export default class RosObjectProvider {
             key: parent.identifier.key,
             namespace: parent.identifier.namespace
         });
+        console.debug(`Creating telemetry for ${name} with type ${type} and rosType ${rosType} and rosTopic ${rosTopic}`, messageDetails);
         const subMessageKeys = typeof messageDetails === 'object' ? Object.keys(messageDetails) : [];
 
         let determinedType = type;

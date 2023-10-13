@@ -72,24 +72,35 @@ export default class RealtimeTelemetryProvider {
 
     subscribe(domainObject, callback) {
         const subscriberID = domainObject.identifier.key;
+
         this.#buildSubscription(domainObject, callback).then(subscriptionDetails => {
             subscriptionDetails.topic.subscribe((data) => {
                 // value is the addressed value in the message
-                // e.g., for a message like {x: 5, y: 2, z: 4}
-                // and an id of someTopic.color._x, the value is just 5
+                // e.g., for a message like {linear: { x: 5, y: 2, z: 4 } }
+                // and an id of someTopic.linear._x, the value is just 5
+
                 const splitId = subscriberID.split('.');
-                const lastKey = splitId[splitId.length - 1];
-                const lastKeyWithoutUnderscore = lastKey.replace('_', '');
-                const value = data[lastKeyWithoutUnderscore];
+
+                // parse as deep as necessary, not just the last key
+                let value = data;
+                splitId.forEach(key => {
+                    key = key.replace('_', '');
+                    if (value && value[key] !== undefined) {
+                        value = value[key];
+                    }
+                });
+
                 const timestamp = Date.now();
                 const datum = {
                     id: domainObject.identifier,
                     timestamp,
                     value
                 };
+
                 subscriptionDetails.cache.set(timestamp, datum);
                 callback(datum);
             });
+
             this.subscriptionsById[subscriberID] = subscriptionDetails;
         });
 

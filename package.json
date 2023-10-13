@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "lru-cache": "^10.0.1",
-    "roslib": "^1.3.0"
+    "roslib": "git+https://github.com/scottbell/roslibjs.git"
   }
 }

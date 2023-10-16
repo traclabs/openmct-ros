@@ -36,8 +36,6 @@ export default class RealtimeTelemetryProvider {
             }
         }
 
-        console.debug(`📡 Found data of size ${dataToBeReturned.length} `);
-
         return dataToBeReturned;
     }
     async #buildSubscription(domainObject, callback) {
@@ -45,7 +43,6 @@ export default class RealtimeTelemetryProvider {
             return this.subscriptionsById[domainObject.identifier.key];
         }
 
-        console.debug(`📡 Building subscription for ${domainObject.identifier.key}`);
         const id = domainObject.identifier.key;
         const rosTopicName = domainObject.rosTopic.replace(/\./g, '/');
         const ros = await this.rosConnection.getConnection();
@@ -111,7 +108,6 @@ export default class RealtimeTelemetryProvider {
 
         return () => {
             if (this.unsubscribeFromTopicsOnStop) {
-                console.debug(`📡 Unsubscribing from ${subscriberID}`);
                 this.subscriptionsById[subscriberID].topic.unsubscribe();
                 delete this.subscriptionsById[subscriberID];
             }

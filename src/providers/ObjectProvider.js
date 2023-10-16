@@ -41,7 +41,6 @@ export default class RosObjectProvider {
     async getRosTopics(ros) {
         const result = await new Promise((resolve, reject) => {
             ros.getTopics((topics) => {
-                console.debug('🥕 Result for topics', topics);
                 resolve(topics);
             }, (error) => {
                 reject(error);
@@ -56,11 +55,9 @@ export default class RosObjectProvider {
         const {topics, types} = await this.getRosTopics(ros);
         // eslint-disable-next-line require-await
         await Promise.all(topics.map(async (topic, index) => {
-            console.debug('🥕 Attempting to add topic', topic);
             const messageType = types[index];
             const messageDetails = await this.#getMessageDetails(ros, messageType);
             const name = topic.replace(/\//g, '.').slice(1);
-            console.debug(`🥕 Fetched details for topic ${topic}`, messageDetails);
             this.#addRosTelemetry({
                 name,
                 type: OBJECT_TYPES.ROS_TOPIC_TYPE,
@@ -69,22 +66,17 @@ export default class RosObjectProvider {
                 rosTopic: name,
                 parent: this.rootObject
             });
-            console.debug('🥕 Added topic', topic);
         }
         ));
-        console.debug('🥕 Dictionary loaded', this.dictionary);
     }
 
     #getMessageDetails(ros, messageType) {
         return new Promise ((resolve, reject) => {
-            console.debug('🥕 Asking for details for', messageType);
             ros.getMessageDetails(messageType, (details) => {
-                console.debug(`🥕 Received details for ${messageType}`, details);
                 const decodeMessageDetails = ros.decodeTypeDefs(details);
-                console.debug('🥕 Decoded message for', decodeMessageDetails);
                 resolve(decodeMessageDetails);
             }, (error) => {
-                console.error('🥕 Error fetching message details', error);
+                console.error(`🚨 Error fetching message details for ${messageType}`, error);
                 reject(error);
             });
         });
@@ -157,8 +149,6 @@ export default class RosObjectProvider {
                 determinedType = OBJECT_TYPES.ROS_LEAF_MESSAGE;
             }
         }
-
-        console.debug(`Creating telemetry for ${name} with type ${determinedType} and rosType ${rosType} and rosTopic ${rosTopic}`, messageDetails);
 
         let determinedName = name;
         if (determinedType !== OBJECT_TYPES.ROS_TOPIC_TYPE) {

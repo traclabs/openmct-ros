@@ -1,6 +1,6 @@
 # ROS Plugin for Open MCT
 This project provides a plugin for connecting Open MCT to ROS 2 (and maybe ROS 1).
-<img width="1448" alt="Open MCT with ROS" src="https://github.com/traclabs/openmct-ros/assets/9853862/65188f91-1b86-4054-91b9-11b3eb8b8039">
+<img width="1626" alt="Open MCT with ROS src="https://github.com/traclabs/openmct-ros/assets/9853862/643a0aaa-38de-4369-887f-a14ff3cce382">
 
 # Requirements
 This plugin requires rosbridge_suite > [1.3.2](https://github.com/RobotWebTools/rosbridge_suite/releases/tag/1.3.2)

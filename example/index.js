@@ -2,7 +2,7 @@
 import installRosPlugin from '../src/plugin.js';
 
 const config = {
-    "rosBridgeEndpoint": "ws://rosmachine:9090",
+    "rosBridgeEndpoint": "ws://localhost:9090",
     "unsubscribeFromTopicsOnStop": false,
     "telemetryDataToKeepPerTopic": 10000,
     "flattenArraysToSize": 10,

@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+  rosbridge:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.rosbridge
+    command: ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+    ports:
+      - "9090:9090"
+    networks:
+      - docker_openmct_link
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  turtlesim:
+    image: osrf/ros:humble-desktop
+    command: ros2 run turtlesim turtlesim_node
+    environment:
+      - DISPLAY=host.docker.internal:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    networks:
+      - docker_openmct_link
+    depends_on:
+      - rosbridge
+  turtle_controller:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.turtle_controller
+    networks:
+      - docker_openmct_link
+    depends_on:
+      - rosbridge
+networks:
+  docker_openmct_link:
+    name: docker_openmct_link
+    driver: bridge

@@ -36,6 +36,6 @@ Note you can change the hostname/IP of the `rosbridge_server` in `example/index.
 ```
 docker compose up
 ```
-2. wait a moment for everything to initialize. You should see the `turtlesim` window appear and circling.
-3. In another terminal, launch `npm start` to start the client
+2. Wait a moment for everything to initialize. You should see the `turtlesim` window appear and circling.
+3. In another terminal, launch `npm start` to start the client.
 4. Refresh your browser pointing to http://localhost:9091/ - it should automatically connect and display a list of ROS topics.

@@ -19,7 +19,8 @@ This should build the example and run the Open MCT development server. After the
 This will start the Open MCT web application connected to a running `rosbridge_server` on `ws://rosmachine:9090`.
 Note you can change the hostname/IP of the `rosbridge_server` in `example/index.js`.
 
-## Using the "fixed" `rosbridge_server`
+## Testing plugin
+### Install `rosbridge_server`
 1. First install [ROS2 Humble Hawksbill](https://docs.ros.org/en/foxy/Releases/Release-Humble-Hawksbill.html) on an Ubuntu machine. This repository will eventually provide a Docker file to do this, but right you'll need a VM.
 ```bash
 mkdir -p ~/ros2_ws/src
@@ -37,7 +38,7 @@ source install/local_setup.bash
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```
 
-## Running turtlesim
+### Running turtlesim
 1. Launch good ol' `turtlesim` like so:
 ```bash
 ros2 run turtlesim turtlesim_node

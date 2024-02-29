@@ -30,11 +30,10 @@ Note you can change the hostname/IP of the `rosbridge_server` in `example/index.
 * Ensure you've followed the guide to allow your [X11 server](http://wiki.ros.org/docker/Tutorials/GUI) to allow for connection.
     * Note on MacOS, ensure 'Allow connections from network clients' has been set in its preferences
 
-### Running turtlesim
-1. Launch `rosbridge_server`, `turtlesim`, and [turtlesim_controller](https://github.com/DominikN/ros2_docker_examples) by running:
+### Running Test
+1. Launch `openmct-ros-dev-server`, `rosbridge_server`, `turtlesim`, and [turtlesim_controller](https://github.com/DominikN/ros2_docker_examples) by running:
 ```
 docker compose up
 ```
 2. wait a moment for everything to initialize. You should see the `turtlesim` window appear and circling.
-3. In another terminal, launch `npm start` to start the client
-4. Refresh your browser pointing to http://localhost:9091/ - it should automatically connect and display a list of ROS topics.
+3. Refresh your browser pointing to http://localhost:9091/ - it should automatically connect and display a list of ROS topics.

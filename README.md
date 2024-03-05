@@ -11,7 +11,7 @@ Get the latest [Node 18](https://nodejs.org/en/download)
 
 Then run:
 ```
-git clone git@bitbucket.org:traclabs/openmct-ros.git
+git clone git@github.com:traclabs/openmct-ros.git
 cd openmct-ros
 npm install
 npm run build:example

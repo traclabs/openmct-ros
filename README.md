@@ -7,7 +7,7 @@ This project provides a plugin for connecting [Open MCT](https://github.com/nasa
 This plugin requires rosbridge_suite > [1.3.2](https://github.com/RobotWebTools/rosbridge_suite/releases/tag/1.3.2)
 
 # Installation
-Get the latest [Node 18](https://nodejs.org/en/download)
+Get the latest [Node JS](https://nodejs.org/en/download)
 
 Then run:
 ```

@@ -30,6 +30,7 @@ export default class RosObjectProvider {
         this.dictionary = {};
         this.fetchRosTopicsPromise = null;
         this.flattenArraysToSize = flattenArraysToSize;
+        this._messageDetailsCache = {};
 
         this.#initialize();
     }
@@ -71,15 +72,27 @@ export default class RosObjectProvider {
     }
 
     #getMessageDetails(ros, messageType) {
-        return new Promise ((resolve, reject) => {
-            ros.getMessageDetails(messageType, (details) => {
-                const decodeMessageDetails = ros.decodeTypeDefs(details);
-                resolve(decodeMessageDetails);
-            }, (error) => {
-                console.error(`🚨 Error fetching message details for ${messageType}`, error);
-                reject(error);
-            });
+        // Return cached promise if it exists
+        if (this._messageDetailsCache[messageType]) {
+            return this._messageDetailsCache[messageType];
+        }
+
+        // Otherwise, create, cache, and return a new promise
+        this._messageDetailsCache[messageType] = new Promise((resolve, reject) => {
+            ros.getMessageDetails(
+                messageType,
+                (details) => {
+                    const decodeMessageDetails = ros.decodeTypeDefs(details);
+                    resolve(decodeMessageDetails);
+                },
+                (error) => {
+                    console.error(`🚨 Error fetching message details for ${messageType}`, error);
+                    reject(error);
+                }
+            );
         });
+
+        return this._messageDetailsCache[messageType];
     }
 
     #loadRosDictionary() {

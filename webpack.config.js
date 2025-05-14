@@ -32,12 +32,12 @@ const WEBPACK_CONFIG = {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'umd',
-        library: 'openmcRos'
+        library: 'openmctRos'
     },
     devtool: devMode ? 'eval-source-map' : 'source-map',
     devServer: {
         compress: true,
-        port: 9091,
+        port: 9097,
         static: [{
             directory: path.join(__dirname, 'example')
         }, {

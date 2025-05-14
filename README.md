@@ -18,7 +18,7 @@ npm run build:example
 npm start
 ```
 
-This should build the example and run the Open MCT development server. After the server has started, launch a web browser pointing to http://localhost:9091/ 
+This should build the example and run the Open MCT development server. After the server has started, launch a web browser pointing to http://localhost:9097/ 
 
 This will start the Open MCT web application connected to a running `rosbridge_server` on `ws://localhost:9090`.
 Note you can change the hostname/IP of the `rosbridge_server` in `example/index.js`.

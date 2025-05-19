@@ -20,10 +20,10 @@
   "author": "TRACLabs Inc.",
   "license": "closed",
   "engines": {
-    "node": ">=14.19.1 <18.99.0"
+    "node": ">=14.0.0"
   },
   "peerDependencies": {
-    "openmct": "^4.1.0"
+    "openmct": "^4.1.0 || ^4.1.0-next"
   },
   "devDependencies": {
     "@babel/core": "7.19.6",

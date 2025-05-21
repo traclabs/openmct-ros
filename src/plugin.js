@@ -32,7 +32,8 @@ export default function installRosPlugin(configuration) {
             openmct,
             rosConnection,
             configuration.namespace,
-            configuration.flattenArraysToSize
+            configuration.flattenArraysToSize,
+            configuration.topicDetailsBatchSize
         );
 
         openmct.objects.addRoot({

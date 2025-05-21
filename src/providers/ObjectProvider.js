@@ -22,7 +22,7 @@ const formatConversionMap = {
 };
 
 export default class RosObjectProvider {
-    constructor(openmct, rosConnection, namespace, flattenArraysToSize) {
+    constructor(openmct, rosConnection, namespace, flattenArraysToSize, topicDetailsBatchSize) {
         this.openmct = openmct;
         this.rosConnection = rosConnection;
         this.namespace = namespace;
@@ -30,7 +30,8 @@ export default class RosObjectProvider {
         this.dictionary = {};
         this.fetchRosTopicsPromise = null;
         this.flattenArraysToSize = flattenArraysToSize;
-        this._messageDetailsCache = {};
+        this.topicDetailsBatchSize = topicDetailsBatchSize;
+        this.messageDetailsCache = {};
 
         this.#initialize();
     }
@@ -53,32 +54,38 @@ export default class RosObjectProvider {
 
     async #fetchFromRos() {
         const ros = await this.rosConnection.getConnection();
-        const {topics, types} = await this.getRosTopics(ros);
-        // eslint-disable-next-line require-await
-        await Promise.all(topics.map(async (topic, index) => {
-            const messageType = types[index];
-            const messageDetails = await this.#getMessageDetails(ros, messageType);
-            const name = topic.replace(/\//g, '.').slice(1);
-            this.#addRosTelemetry({
-                name,
-                type: OBJECT_TYPES.ROS_TOPIC_TYPE,
-                messageDetails,
-                rosType: messageType,
-                rosTopic: name,
-                parent: this.rootObject
-            });
+        const { topics, types } = await this.getRosTopics(ros);
+
+        for (let i = 0; i < topics.length; i += this.topicDetailsBatchSize) {
+            const batchTopics = topics.slice(i, i + this.topicDetailsBatchSize);
+            const batchTypes = types.slice(i, i + this.topicDetailsBatchSize);
+
+            // wait for this batch to complete before firing the next
+            await Promise.all(batchTopics.map(async (topic, idx) => {
+                const messageType = batchTypes[idx];
+                const messageDetails = await this.#getMessageDetails(ros, messageType);
+                const name = topic.replace(/\//g, '.').slice(1);
+
+                this.#addRosTelemetry({
+                    name,
+                    type: OBJECT_TYPES.ROS_TOPIC_TYPE,
+                    messageDetails,
+                    rosType: messageType,
+                    rosTopic: name,
+                    parent: this.rootObject
+                });
+            }));
         }
-        ));
     }
 
     #getMessageDetails(ros, messageType) {
         // Return cached promise if it exists
-        if (this._messageDetailsCache[messageType]) {
-            return this._messageDetailsCache[messageType];
+        if (this.messageDetailsCache[messageType]) {
+            return this.messageDetailsCache[messageType];
         }
 
         // Otherwise, create, cache, and return a new promise
-        this._messageDetailsCache[messageType] = new Promise((resolve, reject) => {
+        this.messageDetailsCache[messageType] = new Promise((resolve, reject) => {
             ros.getMessageDetails(
                 messageType,
                 (details) => {
@@ -92,7 +99,7 @@ export default class RosObjectProvider {
             );
         });
 
-        return this._messageDetailsCache[messageType];
+        return this.messageDetailsCache[messageType];
     }
 
     #loadRosDictionary() {

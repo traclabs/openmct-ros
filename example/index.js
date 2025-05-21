@@ -6,6 +6,7 @@ const config = {
     "unsubscribeFromTopicsOnStop": false,
     "telemetryDataToKeepPerTopic": 10000,
     "flattenArraysToSize": 10,
+    "topicDetailsBatchSize": 5,
     "namespace": "ros"
 };
 const openmct = window.openmct;
